@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { slides } from './data/slides';
 import SlideRenderer from './components/SlideRenderer';
 import { ChevronLeft, ChevronRight, Download, Loader2 } from 'lucide-react';
+import { SlideType } from './types';
 
 const App: React.FC = () => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -60,7 +61,9 @@ const App: React.FC = () => {
         logging: false,
         scrollY: 0, // Important to prevent vertical offsets
         windowWidth: 1280, // Force the capture width
-        windowHeight: 720  // Force the capture height base
+        windowHeight: 720,  // Force the capture height base
+        x: 0,
+        y: 0
       },
       jsPDF: { unit: 'px', format: [1280, 720], orientation: 'landscape' },
       pagebreak: { mode: 'avoid-all', after: '.page-break-after-always' }
@@ -110,7 +113,7 @@ const App: React.FC = () => {
       {/* Header */}
       <div className="absolute top-0 left-0 w-full p-8 z-50 flex justify-between items-center">
         <div 
-            className={`text-2xl font-brand tracking-wide cursor-pointer select-none ${isDark ? 'text-white' : 'text-black'}`} 
+            className={`text-2xl font-brand tracking-wide cursor-pointer select-none transition-opacity duration-300 ${isDark ? 'text-white' : 'text-black'} ${currentSlideIndex === 0 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} 
             onClick={() => goToSlide(0)}
         >
           GoBig.
@@ -173,13 +176,12 @@ const App: React.FC = () => {
 
       {/* PDF Export Container - FIXED */}
       {/* 
-          1. Removed 'opacity-0' and 'transform' which caused blank PDFs.
-          2. Used -z-50 to hide it behind the main app content.
-          3. Fixed width ensures layout consistency during export.
+          1. Moved completely off-screen (left: -15000px) to prevent bleeding through transparent backgrounds.
+          2. Fixed width ensures layout consistency during export.
       */}
       <div 
         id="pdf-export-container" 
-        className="fixed top-0 left-0 -z-50 pointer-events-none"
+        className="fixed top-0 left-[-15000px] -z-50 pointer-events-none"
         style={{ width: '1280px' }} 
       >
         {slides.map((slide, idx) => (
@@ -198,11 +200,14 @@ const App: React.FC = () => {
                     </div>
                 )}
                 
-                <div className="absolute top-0 left-0 w-full p-12 z-50">
-                    <div className={`text-3xl font-brand ${slide.theme === 'dark' ? 'text-white' : 'text-black'}`}>
-                        GoBig.
+                {/* Header for PDF - Only show if NOT the Hero slide to avoid duplication */}
+                {slide.type !== SlideType.HERO && (
+                    <div className="absolute top-0 left-0 w-full p-12 z-50">
+                        <div className={`text-3xl font-brand ${slide.theme === 'dark' ? 'text-white' : 'text-black'}`}>
+                            GoBig.
+                        </div>
                     </div>
-                </div>
+                )}
 
                 <div className="h-full w-full pt-16 pb-16">
                      <SlideRenderer data={slide} isActive={true} />
