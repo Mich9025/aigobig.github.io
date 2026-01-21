@@ -38,6 +38,7 @@ const App: React.FC = () => {
 
   const handleDownloadPDF = async () => {
     setIsGeneratingPdf(true);
+    // Give React a moment to render any pending state if needed
     await new Promise(resolve => setTimeout(resolve, 500));
 
     const element = document.getElementById('pdf-export-container');
@@ -53,8 +54,16 @@ const App: React.FC = () => {
       margin: 0,
       filename: 'GoBigAgency_Presentation.pdf',
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'px', format: [1280, 720], orientation: 'landscape' }
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true, 
+        logging: false,
+        scrollY: 0, // Important to prevent vertical offsets
+        windowWidth: 1280, // Force the capture width
+        windowHeight: 720  // Force the capture height base
+      },
+      jsPDF: { unit: 'px', format: [1280, 720], orientation: 'landscape' },
+      pagebreak: { mode: 'avoid-all', after: '.page-break-after-always' }
     };
 
     worker.set(opt).from(element).save().then(() => {
@@ -78,7 +87,8 @@ const App: React.FC = () => {
   const isDark = currentSlide.theme === 'dark';
 
   return (
-    <div className={`h-screen w-full relative overflow-hidden transition-colors duration-500 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
+    // Added z-10 here to ensure the main app sits ON TOP of the PDF container
+    <div className={`h-screen w-full relative overflow-hidden transition-colors duration-500 z-10 ${isDark ? 'bg-black text-white' : 'bg-white text-black'}`}>
       
       {/* Backgrounds */}
       {isDark ? (
@@ -99,7 +109,6 @@ const App: React.FC = () => {
 
       {/* Header */}
       <div className="absolute top-0 left-0 w-full p-8 z-50 flex justify-between items-center">
-        {/* On dark slides, logo is white. On light slides, logo is colorful or black? PDF shows header on light slides has white text on the dark graphical part, or black text. Let's stick to theme color. */}
         <div 
             className={`text-2xl font-brand tracking-wide cursor-pointer select-none ${isDark ? 'text-white' : 'text-black'}`} 
             onClick={() => goToSlide(0)}
@@ -111,7 +120,7 @@ const App: React.FC = () => {
             <button 
                 onClick={handleDownloadPDF}
                 disabled={isGeneratingPdf}
-                className={`p-2 rounded-full border transition-all flex items-center justify-center gap-2 px-4 ${isDark ? 'border-white hover:bg-white/10' : 'border-black hover:bg-black/5'}`}
+                className={`hidden p-2 rounded-full border transition-all flex items-center justify-center gap-2 px-4 ${isDark ? 'border-white hover:bg-white/10' : 'border-black hover:bg-black/5'}`}
             >
                 {isGeneratingPdf ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
                 <span className="hidden md:inline text-xs font-bold uppercase tracking-widest">PDF</span>
@@ -162,15 +171,20 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* PDF Export Container */}
+      {/* PDF Export Container - FIXED */}
+      {/* 
+          1. Removed 'opacity-0' and 'transform' which caused blank PDFs.
+          2. Used -z-50 to hide it behind the main app content.
+          3. Fixed width ensures layout consistency during export.
+      */}
       <div 
         id="pdf-export-container" 
-        className="fixed top-0 left-0 -z-50 pointer-events-none opacity-0"
-        style={{ transform: 'translateX(-10000px)' }}
+        className="fixed top-0 left-0 -z-50 pointer-events-none"
+        style={{ width: '1280px' }} 
       >
         {slides.map((slide, idx) => (
             <div key={idx} className={`w-[1280px] h-[720px] relative overflow-hidden page-break-after-always ${slide.theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black'}`}>
-                {/* Backgrounds */}
+                {/* Backgrounds - duplicated manually to ensure they capture correctly */}
                 {slide.theme === 'dark' ? (
                     <div className="absolute inset-0 z-0">
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-800/20 via-black to-black"></div>
@@ -180,6 +194,7 @@ const App: React.FC = () => {
                 ) : (
                     <div className="absolute inset-0 z-0 bg-white">
                         <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-r from-purple-600 via-blue-500 to-green-400 opacity-20 blur-3xl transform -translate-y-24 scale-y-150"></div>
+                        <div className="absolute top-0 w-full h-32 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
                     </div>
                 )}
                 
