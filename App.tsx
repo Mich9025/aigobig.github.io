@@ -107,11 +107,11 @@ const App: React.FC = () => {
 
              {/* Specific Hero Background Image - Blended ON TOP of the glows */}
              {currentSlide.id === 1 && (
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
                     <img 
                         src={heroBgImage}
                         alt="" 
-                        className="w-full h-full object-cover opacity-60 mix-blend-screen"
+                        className="w-full h-full object-cover opacity-60 mix-blend-screen animate-ken-burns"
                     />
                 </div>
              )}
