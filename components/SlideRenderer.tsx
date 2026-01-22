@@ -33,19 +33,23 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
       <div className="flex flex-col items-center justify-center h-full text-center px-6 relative z-10">
          {/* Main Typography */}
          <div className="relative">
-            <h1 className="text-[12rem] leading-[0.8] font-brand tracking-tighter text-white">
-              GoBig.
+            {/* Dynamic Title with responsive sizing */}
+            <h1 className="text-[6rem] md:text-[10rem] leading-[0.9] font-brand tracking-tighter text-white">
+              {data.title}
             </h1>
-            <h2 className="text-6xl md:text-8xl font-brand text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
+            
+            {/* Subtitle adjusted for longer text */}
+            <h2 className="mt-4 max-w-5xl text-2xl md:text-5xl font-brand text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-gray-400 leading-tight">
               {data.subtitle}
             </h2>
+
             {/* Lightning Bolt Decoration (CSS shape) */}
-            <div className="absolute top-0 right-[-40px] md:right-[-60px] text-6xl md:text-8xl animate-pulse">
+            <div className="absolute top-0 right-[-20px] md:right-[-40px] text-5xl md:text-7xl animate-pulse">
                 ⚡
             </div>
          </div>
          
-         <div className="mt-12 space-y-2">
+         <div className="mt-8 space-y-2">
             {data.content?.map((line, idx) => (
                 <p key={idx} className="text-xl md:text-2xl font-light tracking-wide text-gray-300">
                     {line}

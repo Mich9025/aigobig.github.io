@@ -9,6 +9,8 @@ const App: React.FC = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
+  const heroBgImage = "https://gobigagency.vercel.app/_next/image?url=%2Fassets%2Fimgs%2Fshape%2Fimg-s-75.png&w=1920&q=75";
+
   const nextSlide = () => {
     if (currentSlideIndex < slides.length - 1 && !isTransitioning) {
       triggerTransition(() => setCurrentSlideIndex(prev => prev + 1));
@@ -96,11 +98,23 @@ const App: React.FC = () => {
       {/* Backgrounds */}
       {isDark ? (
          <div className="absolute inset-0 z-0">
-             {/* Dark Texture */}
+             {/* Dark Texture Base */}
              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-800/20 via-black to-black"></div>
-             {/* Iridescent Glows */}
+             
+             {/* Iridescent Glows - Rendered on ALL dark slides now (including Slide 1) to provide color */}
              <div className="absolute top-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-purple-900/30 rounded-full blur-[100px]"></div>
              <div className="absolute bottom-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-blue-900/20 rounded-full blur-[100px]"></div>
+
+             {/* Specific Hero Background Image - Blended ON TOP of the glows */}
+             {currentSlide.id === 1 && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <img 
+                        src={heroBgImage}
+                        alt="" 
+                        className="w-full h-full object-cover opacity-60 mix-blend-screen"
+                    />
+                </div>
+             )}
          </div>
       ) : (
          <div className="absolute inset-0 z-0 bg-white">
@@ -190,8 +204,21 @@ const App: React.FC = () => {
                 {slide.theme === 'dark' ? (
                     <div className="absolute inset-0 z-0">
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-800/20 via-black to-black"></div>
-                         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-900/30 rounded-full blur-[100px]"></div>
+                        
+                        {/* Always show glows in dark mode for PDF too */}
+                        <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-900/30 rounded-full blur-[100px]"></div>
                         <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-900/20 rounded-full blur-[100px]"></div>
+
+                        {/* Show Image blended on top if Slide 1 */}
+                        {slide.id === 1 && (
+                             <div className="absolute inset-0 flex items-center justify-center">
+                                <img 
+                                    src={heroBgImage}
+                                    alt="" 
+                                    className="w-full h-full object-cover opacity-60 mix-blend-screen"
+                                />
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="absolute inset-0 z-0 bg-white">

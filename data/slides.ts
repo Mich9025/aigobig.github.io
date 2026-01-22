@@ -5,12 +5,9 @@ export const slides: SlideData[] = [
     id: 1,
     type: SlideType.HERO,
     theme: 'dark',
-    title: "GoBig.",
-    subtitle: "Experiencias",
-    content: [
-      "Marketing que llena mesas",
-      "Resultados con Inteligencia"
-    ]
+    title: "GoBig AI",
+    subtitle: "Resultados con inteligencia, creatividad y tecnología",
+    content: []
   },
   {
     id: 2,
