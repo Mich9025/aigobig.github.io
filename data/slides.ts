@@ -126,7 +126,11 @@ export const slides: SlideData[] = [
         challenge: "Activación manual de aliados sin validación de capacitación efectiva.",
         solution: "Plataforma e-learning para enseñar el uso del sistema interno de asignación de servicios, con activación automática.",
         result: "Onboarding 100% autónomo con activación inmediata.",
-        logoColor: "text-orange-600"
+        logoColor: "text-orange-600",
+        images: {
+            before: "https://darkorchid-raccoon-617111.hostingersite.com/wp-content/uploads/2026/01/Quick-Track-2.jpeg",
+            after: "https://darkorchid-raccoon-617111.hostingersite.com/wp-content/uploads/2026/01/Quick-Track.jpeg"
+        }
       }
     ]
   },

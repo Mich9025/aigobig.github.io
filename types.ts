@@ -17,6 +17,11 @@ export interface MetricItem {
   subLabel: string;
 }
 
+export interface CaseImages {
+  before: string;
+  after: string;
+}
+
 export interface CaseStudy {
   client: string;
   industry: string;
@@ -24,6 +29,7 @@ export interface CaseStudy {
   solution: string;
   result: string;
   logoColor?: string;
+  images?: CaseImages;
 }
 
 export interface ProcessStep {

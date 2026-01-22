@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { SlideData, SlideType } from '../types';
 import { 
   Database, 
@@ -17,7 +17,9 @@ import {
   Rocket,
   Zap,
   X,
-  AlertCircle
+  AlertCircle,
+  ZoomIn,
+  Maximize2
 } from 'lucide-react';
 
 interface SlideRendererProps {
@@ -26,7 +28,42 @@ interface SlideRendererProps {
 }
 
 const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
+  const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+
+  // Close lightbox on Escape key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setLightboxImg(null);
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
+
   const isDark = data.theme === 'dark';
+
+  // Lightbox Modal Component
+  const Lightbox = () => {
+      if (!lightboxImg) return null;
+      return (
+          <div 
+            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300"
+            onClick={() => setLightboxImg(null)}
+          >
+              <button 
+                onClick={() => setLightboxImg(null)}
+                className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors"
+              >
+                  <X size={48} />
+              </button>
+              <img 
+                src={lightboxImg} 
+                alt="Full view" 
+                className="max-w-full max-h-full object-contain rounded-lg shadow-2xl scale-100"
+                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image itself
+              />
+          </div>
+      );
+  };
 
   if (data.type === SlideType.HERO) {
     return (
@@ -240,6 +277,8 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
 
     return (
         <div className="flex flex-col h-full px-8 md:px-16 justify-center w-full max-w-[1400px] mx-auto">
+             <Lightbox />
+             
              <div className="mb-8 flex items-end gap-6">
                 <h2 className="text-5xl md:text-7xl font-brand leading-none">
                     {data.title}
@@ -287,6 +326,39 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
                                     {item.solution}
                                 </p>
                              </div>
+
+                             {/* IMAGES BEFORE / AFTER (Only for NVO or if images exist) */}
+                             {item.images && (
+                                <div className="grid grid-cols-2 gap-4 mt-2">
+                                    {/* Before Image */}
+                                    <div 
+                                        className="group relative h-32 rounded-lg overflow-hidden cursor-pointer border border-gray-200"
+                                        onClick={() => item.images && setLightboxImg(item.images.before)}
+                                    >
+                                        <img src={item.images.before} alt="Antes" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <ZoomIn className="text-white" size={24} />
+                                        </div>
+                                        <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
+                                            ANTES
+                                        </div>
+                                    </div>
+
+                                    {/* After Image */}
+                                    <div 
+                                        className="group relative h-32 rounded-lg overflow-hidden cursor-pointer border border-gray-200"
+                                        onClick={() => item.images && setLightboxImg(item.images.after)}
+                                    >
+                                        <img src={item.images.after} alt="Después" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Maximize2 className="text-white" size={24} />
+                                        </div>
+                                        <div className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
+                                            DESPUÉS
+                                        </div>
+                                    </div>
+                                </div>
+                             )}
 
                              <div className="mt-auto bg-gray-50 p-4 rounded-lg border-l-4 border-green-500">
                                 <p className="text-green-800 font-bold text-lg flex items-start gap-2">
