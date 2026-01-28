@@ -146,3 +146,266 @@ export const slides: SlideData[] = [
     ]
   }
 ];
+
+export const roadmapSlides: SlideData[] = [
+  {
+    id: 1,
+    type: SlideType.HERO,
+    theme: 'dark',
+    title: "Roadmap: SAAS",
+    subtitle: "Centralización y Escalabilidad de Data Operativa",
+    content: [
+      "Propuesta de valor y plan de ejecución",
+      "Para directores y gerentes de operación",
+      "Gestión de Capacitaciónes y reporteria"
+    ]
+  },
+  {
+    id: 2,
+    type: SlideType.PROBLEM,
+    theme: 'light',
+    title: "Contexto del Problema",
+    subtitle: "Estado Actual y Fricción",
+    content: [
+      "Dependencia de data operativa sucia y dispersa.",
+      "Consolidación manual propensa a errores.",
+      "Identidad de usuario fragmentada (Zoom vs SAP).",
+      "Validación compleja: >80% tiempo en sesión."
+    ]
+  },
+  {
+    id: 3,
+    type: SlideType.INFO,
+    theme: 'light',
+    title: "Objetivos de Negocio",
+    subtitle: "Éxito Esperado y Metas",
+    content: [
+      "Centralizar datos: Fuente única de verdad entre Zoom y Master Tiendas.",
+      "Normalización: Estandarización de identidad por Nombre + ID SAP.",
+      "Automatización: Reducir tiempo de reporting manual a cero.",
+      "Adopción: Visualización clara para Directores y Gerentes."
+    ]
+  },
+  {
+    id: 4,
+    type: SlideType.METRICS,
+    theme: 'light',
+    title: "Alcance MVP y KPIs",
+    subtitle: "Dashboard, Reportes, Ranking y Alertas",
+    metrics: [
+      {
+        value: "Cascade",
+        label: "Score",
+        subLabel: "Tiendas capacitadas / Total"
+      },
+      {
+        value: ">80%",
+        label: "Asistencia",
+        subLabel: "Tiempo mínimo válido"
+      },
+      {
+        value: "KPI",
+        label: "Retención",
+        subLabel: "Permanencia en sesión"
+      },
+      {
+        value: "Quiz",
+        label: "Participación",
+        subLabel: "Tasa de redemption"
+      }
+    ]
+  },
+  {
+    id: 5,
+    type: SlideType.SOLUTION,
+    theme: 'light',
+    title: "Roadmap Macro",
+    subtitle: "Plan de Ejecución por Fases",
+    process: [
+      {
+        step: "Fase 0",
+        title: "Discovery",
+        description: "1 semana. Blueprint y auditoría de datos."
+      },
+      {
+        step: "Fase 1",
+        title: "MVP",
+        description: "6-8 semanas. Dashboard central y reportes core."
+      },
+      {
+        step: "Fase 2",
+        title: "Full",
+        description: "11-16 semanas. Workflows avanzados."
+      },
+      {
+        step: "Fase 3",
+        title: "Evolución",
+        description: "Continuo. Analítica avanzada y correlación de negocio."
+      }
+    ]
+  },
+  {
+    id: 6,
+    type: SlideType.INFO,
+    theme: 'light',
+    title: "Fase 0: Discovery",
+    subtitle: "Duración: 1 Semana",
+    content: [
+      "Mapeo detallado de fuentes de datos (Zoom, Excel, SAP).",
+      "Definición de reglas de normalización de usuarios.",
+      "Diseño de arquitectura técnica preliminar.",
+      "Criterio de salida: Blueprint aprobado por stakeholders."
+    ],
+    deliverables: [
+        "Propuesta comercial detallada",
+        "Setup técnico y de entorno",
+        "Diseño de Bases de Datos (ERD)"
+    ]
+  },
+  {
+    id: 7,
+    type: SlideType.INFO,
+    theme: 'light',
+    title: "Fase 1: MVP",
+    subtitle: "Duración: 10 a 16 Semanas",
+    content: [
+      "Ingesta automática de logs de Zoom y Master de Tiendas.",
+      "Dashboard interactivo para Directores y Gerentes.",
+      "Integración de Quiz nativo para validación de conocimiento.",
+      "Cálculo automático de Cascade Score y Asistencia."
+    ],
+    deliverables: [
+        "Motor de KPIs",
+        "Dashboard General Interactivo",
+        "Reporte periódico automático",
+        "Módulo de Quiz Nativo",
+        "Ranking por Tienda y Distrito"
+    ],
+    images: [
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2670&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop"
+    ]
+  },
+  {
+    id: 8,
+    type: SlideType.INFO,
+    theme: 'light',
+    title: "Fase 2: Versión Completa",
+    subtitle: "Duración: 11 a 20 Semanas",
+    content: [
+      "Ampliación a Workflows avanzados de aprobación.",
+      "Gestión granular de excepciones y justificaciones.",
+      "Soporte Multi-canal y Multi-tenant robusto.",
+      "Auditoría completa de acciones de usuario."
+    ],
+    deliverables: [
+        "Dashboard por roles (Admin/Gerente)",
+        "Workflows avanzados",
+        "Canal externo (Aliados)",
+        "Construcción del e-learning"
+    ],
+    images: [
+        "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2670&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=2555&auto=format&fit=crop"
+    ]
+  },
+  {
+    id: 9,
+    type: SlideType.INFO,
+    theme: 'light',
+    title: "Fase 3: Evolución",
+    subtitle: "Mejora Continua (Sprints Mensuales)",
+    content: [
+      "Correlación: Capacitación vs Ventas/Campañas.",
+      "Modelos predictivos de desempeño de tienda.",
+      "Optimización de UX basada en feedback real.",
+      "Integración con nuevas fuentes de datos de negocio."
+    ],
+    deliverables: [
+        "Propuesta de entregables Fase 3",
+        "Integración de IA",
+        "App web responsiva"
+    ],
+    images: [
+        "https://images.unsplash.com/photo-1535378437323-9555841f5d21?q=80&w=2548&auto=format&fit=crop",
+        "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=2670&auto=format&fit=crop"
+    ]
+  },
+  {
+    id: 10,
+    type: SlideType.INFO,
+    theme: 'light',
+    title: "Stack & Arquitectura",
+    subtitle: "Tecnología Escalable y Segura",
+    content: [
+      "Frontend: Next.js + React.js + TypeScript (Velocidad y Tipado).",
+      "Backend: Node.js con arquitectura orientada a eventos.",
+      "Base de Datos: SQL Relacional (PostgreSQL) para integridad de datos.",
+      "Infraestructura: Despliegue en la nube con CI/CD automatizado."
+    ],
+    mermaidDefinition: `
+    graph TD
+    subgraph Client [Cliente]
+      Browser[Navegador Web]
+    end
+
+    subgraph Cloud [Infraestructura Cloud]
+      LB[Load Balancer]
+      
+      subgraph App [Aplicación]
+        Next[Next.js Frontend]
+        API[Node.js API]
+        Worker[Workers Asíncronos]
+      end
+      
+      subgraph Data [Datos]
+        DB[(PostgreSQL)]
+        Cache[(Redis Cache)]
+      end
+    end
+
+    subgraph External [Fuentes Externas]
+      Zoom[Zoom API]
+      Master["Master Tiendas (Excel/CSV)"]
+    end
+
+    Browser -->|HTTPS| LB
+    LB --> Next
+    Next -->|SSR/API| API
+    API -->|Query| DB
+    API -->|Cache| Cache
+    API -->|Job| Worker
+    Worker -->|Process| Zoom
+    Worker -->|Ingest| Master
+    Worker -->|Write| DB
+    
+    style Client fill:#f9f,stroke:#333,stroke-width:2px
+    style Cloud fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    style Data fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
+    `
+  },
+  {
+    id: 11,
+    type: SlideType.INFO,
+    theme: 'light',
+    title: "Riesgos y Mitigaciones",
+    subtitle: "Supuestos Clave",
+    content: [
+      "Acceso a API/Logs de Zoom (Mitigación: Solicitud temprana IT).",
+      "Calidad Master Tiendas (Mitigación: Validadores de entrada).",
+      "Cambio Organizacional (Mitigación: Capacitación a usuarios).",
+      "Reglas de KPI complejas (Mitigación: Documentación viva)."
+    ]
+  },
+  {
+    id: 12,
+    type: SlideType.CONTACT,
+    theme: 'dark',
+    title: "Próximos Pasos.",
+    subtitle: "Plan de Arranque",
+    content: [
+      "Workshop inicial de alineación",
+      "DEFINIR CRONOGRAMA"
+    ]
+  }
+];

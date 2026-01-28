@@ -1,15 +1,74 @@
 import React, { useState, useEffect } from 'react';
-import { slides } from './data/slides';
+import { slides as mainSlides, roadmapSlides } from './data/slides';
 import SlideRenderer from './components/SlideRenderer';
-import { ChevronLeft, ChevronRight, Download, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Loader2, Map, Layout } from 'lucide-react';
 import { SlideType } from './types';
 
 const App: React.FC = () => {
+  // Helper to check URL state
+  const getInitialDeck = (): 'main' | 'roadmap' => {
+    if (typeof window !== 'undefined') {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            // Support both ?deck=roadmap and /roadmap path
+            if (params.get('deck') === 'roadmap' || window.location.pathname.endsWith('/roadmap')) {
+                return 'roadmap';
+            }
+        } catch (e) {
+            console.warn("Could not read initial URL state:", e);
+        }
+    }
+    return 'main';
+  };
+
+  const [activeDeck, setActiveDeck] = useState<'main' | 'roadmap'>(getInitialDeck);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+        const newDeck = getInitialDeck();
+        if (newDeck !== activeDeck) {
+            setActiveDeck(newDeck);
+            setCurrentSlideIndex(0);
+        }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [activeDeck]);
+
+  // Determine which set of slides to use
+  const slides = activeDeck === 'main' ? mainSlides : roadmapSlides;
+
   const heroBgImage = "https://gobigagency.vercel.app/_next/image?url=%2Fassets%2Fimgs%2Fshape%2Fimg-s-75.png&w=1920&q=75";
+
+  // Function to toggle between decks
+  const toggleDeck = () => {
+    triggerTransition(() => {
+        const nextDeck = activeDeck === 'main' ? 'roadmap' : 'main';
+        
+        // Update State
+        setActiveDeck(nextDeck);
+        setCurrentSlideIndex(0);
+
+        // Update URL safely
+        try {
+            const url = new URL(window.location.href);
+            if (nextDeck === 'roadmap') {
+                url.searchParams.set('deck', 'roadmap');
+            } else {
+                url.searchParams.delete('deck');
+            }
+            window.history.pushState({}, '', url);
+        } catch (e) {
+            // Context likely prevents history manipulation (e.g. blob url or sandbox)
+            console.debug('URL update skipped:', e);
+        }
+    });
+  };
 
   const nextSlide = () => {
     if (currentSlideIndex < slides.length - 1 && !isTransitioning) {
@@ -55,7 +114,7 @@ const App: React.FC = () => {
     
     const opt = {
       margin: 0,
-      filename: 'GoBigAgency_Presentation.pdf',
+      filename: `GoBigAgency_${activeDeck === 'main' ? 'Presentation' : 'Roadmap'}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { 
         scale: 2, 
@@ -86,7 +145,7 @@ const App: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentSlideIndex, isTransitioning]);
+  }, [currentSlideIndex, isTransitioning, activeDeck]);
 
   const currentSlide = slides[currentSlideIndex];
   const isDark = currentSlide.theme === 'dark';
@@ -106,7 +165,7 @@ const App: React.FC = () => {
              <div className="absolute bottom-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-blue-900/20 rounded-full blur-[100px]"></div>
 
              {/* Specific Hero Background Image - Blended ON TOP of the glows */}
-             {currentSlide.id === 1 && (
+             {currentSlide.type === SlideType.HERO && (
                 <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
                     <img 
                         src={heroBgImage}
@@ -126,11 +185,33 @@ const App: React.FC = () => {
 
       {/* Header */}
       <div className="absolute top-0 left-0 w-full p-8 z-50 flex justify-between items-center">
-        <div 
-            className={`text-2xl font-brand tracking-wide cursor-pointer select-none transition-opacity duration-300 ${isDark ? 'text-white' : 'text-black'} ${currentSlideIndex === 0 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} 
-            onClick={() => goToSlide(0)}
-        >
-          GoBig.
+        <div className="flex items-center gap-6">
+            <div 
+                className={`text-2xl font-brand tracking-wide cursor-pointer select-none transition-opacity duration-300 ${isDark ? 'text-white' : 'text-black'} ${currentSlideIndex === 0 && activeDeck === 'main' ? 'opacity-100' : 'opacity-100'}`} 
+                onClick={() => goToSlide(0)}
+            >
+            GoBig.
+            </div>
+
+            {/* DECK SWITCHER BUTTON */}
+            <button
+                onClick={toggleDeck}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border transition-all duration-300 ${
+                    isDark 
+                    ? 'border-white/30 hover:bg-white text-white hover:text-black' 
+                    : 'border-black/30 hover:bg-black text-black hover:text-white'
+                }`}
+            >
+                {activeDeck === 'main' ? (
+                    <>
+                        <Map size={14} /> Roadmap
+                    </>
+                ) : (
+                    <>
+                        <Layout size={14} /> GoBig AI
+                    </>
+                )}
+            </button>
         </div>
         
         <div className="flex items-center gap-4">
@@ -188,11 +269,7 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* PDF Export Container - FIXED */}
-      {/* 
-          1. Moved completely off-screen (left: -15000px) to prevent bleeding through transparent backgrounds.
-          2. Fixed width ensures layout consistency during export.
-      */}
+      {/* PDF Export Container - DYNAMIC based on active Deck */}
       <div 
         id="pdf-export-container" 
         className="fixed top-0 left-[-15000px] -z-50 pointer-events-none"
@@ -210,7 +287,7 @@ const App: React.FC = () => {
                         <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-900/20 rounded-full blur-[100px]"></div>
 
                         {/* Show Image blended on top if Slide 1 */}
-                        {slide.id === 1 && (
+                        {slide.type === SlideType.HERO && (
                              <div className="absolute inset-0 flex items-center justify-center">
                                 <img 
                                     src={heroBgImage}

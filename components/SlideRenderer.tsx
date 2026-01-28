@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SlideData, SlideType } from '../types';
+import mermaid from 'mermaid';
 import { 
   Database, 
   Users, 
@@ -19,7 +20,13 @@ import {
   X,
   AlertCircle,
   ZoomIn,
-  Maximize2
+  Maximize2,
+  List,
+  Target,
+  ShieldAlert,
+  PackageCheck,
+  Image as ImageIcon,
+  Workflow
 } from 'lucide-react';
 
 interface SlideRendererProps {
@@ -29,11 +36,49 @@ interface SlideRendererProps {
 
 const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+  const [showArchModal, setShowArchModal] = useState(false);
+  const mermaidRef = useRef<HTMLDivElement>(null);
 
-  // Close lightbox on Escape key
+  // Initialize mermaid configuration
+  useEffect(() => {
+    mermaid.initialize({ 
+        startOnLoad: false,
+        theme: 'neutral',
+        securityLevel: 'loose',
+        fontFamily: 'Inter, sans-serif'
+    });
+  }, []);
+
+  // Render mermaid diagram when modal opens
+  useEffect(() => {
+    if (showArchModal && data.mermaidDefinition && mermaidRef.current) {
+        // Clear previous content
+        mermaidRef.current.innerHTML = '';
+        
+        // Use a unique ID for the diagram
+        const id = `mermaid-${Date.now()}`;
+        
+        // Attempt to render
+        mermaid.render(id, data.mermaidDefinition).then(({ svg }) => {
+            if (mermaidRef.current) {
+                mermaidRef.current.innerHTML = svg;
+            }
+        }).catch(err => {
+            console.error("Mermaid rendering failed", err);
+            if (mermaidRef.current) {
+                mermaidRef.current.innerHTML = '<p class="text-red-500">Error rendering diagram</p>';
+            }
+        });
+    }
+  }, [showArchModal, data.mermaidDefinition]);
+
+  // Close lightbox/modal on Escape key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') setLightboxImg(null);
+        if (e.key === 'Escape') {
+            setLightboxImg(null);
+            setShowArchModal(false);
+        }
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
@@ -65,30 +110,74 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
       );
   };
 
+  // Architecture Modal Component
+  const ArchitectureModal = () => {
+      if (!showArchModal) return null;
+      return (
+          <div 
+            className="fixed inset-0 z-[100] bg-white/95 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300"
+            onClick={() => setShowArchModal(false)}
+          >
+             <div 
+                className="bg-white w-full max-w-6xl h-[80vh] rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden relative"
+                onClick={(e) => e.stopPropagation()}
+             >
+                 {/* Header */}
+                 <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <div>
+                        <h3 className="text-2xl font-brand text-black">Arquitectura del Sistema</h3>
+                        <p className="text-sm text-gray-500">Flujo de datos y componentes</p>
+                    </div>
+                    <button 
+                        onClick={() => setShowArchModal(false)}
+                        className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                    >
+                        <X size={24} className="text-gray-500" />
+                    </button>
+                 </div>
+
+                 {/* Content */}
+                 <div className="flex-1 overflow-auto p-8 flex items-center justify-center bg-white relative">
+                     <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none"></div>
+                     <div ref={mermaidRef} className="w-full flex justify-center mermaid-container">
+                         {/* Mermaid SVG will be injected here */}
+                         <div className="flex items-center gap-2 text-gray-400 animate-pulse">
+                             <List size={20} /> Generando diagrama...
+                         </div>
+                     </div>
+                 </div>
+             </div>
+          </div>
+      );
+  }
+
   if (data.type === SlideType.HERO) {
+    // Check if title is long (e.g. for Roadmap) to adjust font size
+    const isLongTitle = data.title.length > 15;
+
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center px-6 relative z-10">
+      <div className="flex flex-col items-center justify-center h-full text-center px-6 relative z-10 w-full max-w-[90%] mx-auto">
          {/* Main Typography */}
-         <div className="relative">
+         <div className="relative flex flex-col items-center justify-center">
             {/* Dynamic Title with responsive sizing */}
-            <h1 className="text-[6rem] md:text-[10rem] leading-[0.9] font-brand tracking-tighter text-white">
+            <h1 className={`${isLongTitle ? 'text-5xl md:text-7xl lg:text-8xl' : 'text-[6rem] md:text-[10rem]'} leading-[1] md:leading-[0.9] font-brand tracking-tighter text-white transition-all duration-300`}>
               {data.title}
             </h1>
             
             {/* Subtitle adjusted for longer text */}
-            <h2 className="mt-4 max-w-5xl text-2xl md:text-5xl font-brand text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-gray-400 leading-tight">
+            <h2 className={`mt-6 ${isLongTitle ? 'text-2xl md:text-3xl' : 'max-w-5xl text-2xl md:text-5xl'} font-brand text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-gray-400 leading-tight`}>
               {data.subtitle}
             </h2>
 
             {/* Lightning Bolt Decoration (CSS shape) */}
-            <div className="absolute top-0 right-[-20px] md:right-[-40px] text-5xl md:text-7xl animate-pulse">
+            <div className={`absolute top-0 ${isLongTitle ? 'right-[-20px] -translate-y-4 text-4xl md:text-6xl' : 'right-[-20px] md:right-[-40px] text-5xl md:text-7xl'} animate-pulse`}>
                 ⚡
             </div>
          </div>
          
-         <div className="mt-8 space-y-2">
+         <div className="mt-12 space-y-3 flex flex-col items-center">
             {data.content?.map((line, idx) => (
-                <p key={idx} className="text-xl md:text-2xl font-light tracking-wide text-gray-300">
+                <p key={idx} className="text-xl md:text-2xl font-light tracking-wide text-gray-300 max-w-4xl">
                     {line}
                 </p>
             ))}
@@ -145,7 +234,7 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
                                 <AlertCircle size={48} className="text-gray-400" />
                              </div>
                              
-                             <p className="mt-6 text-xl font-brand text-gray-400 uppercase tracking-widest">Sin Estrategia</p>
+                             <p className="mt-6 text-xl font-brand text-gray-400 uppercase tracking-widest">Problema</p>
                              <p className="text-sm text-gray-400 mt-2 font-medium">Caos & Desconexión</p>
                         </div>
 
@@ -162,7 +251,7 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
                                 <Zap size={48} className="text-white fill-white" />
                              </div>
                              
-                             <p className="text-2xl font-brand text-white uppercase tracking-widest drop-shadow-md">Con Estrategia</p>
+                             <p className="text-2xl font-brand text-white uppercase tracking-widest drop-shadow-md">Solución</p>
                              <div className="flex gap-2 mt-3">
                                 <span className="px-2 py-0.5 bg-white/20 rounded text-[10px] text-white font-bold uppercase backdrop-blur-sm">Orden</span>
                                 <span className="px-2 py-0.5 bg-white/20 rounded text-[10px] text-white font-bold uppercase backdrop-blur-sm">Control</span>
@@ -174,13 +263,129 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
                     
                     {/* Interaction Hint */}
                     <div className="absolute -bottom-10 w-full text-center transition-opacity duration-300 group-hover:opacity-0">
-                        <span className="text-xs uppercase tracking-widest text-gray-400 animate-pulse">Pasa el mouse para transformar</span>
+                        <span className="text-xs uppercase tracking-widest text-gray-400 animate-pulse">Pasa el mouse</span>
                     </div>
 
                 </div>
             </div>
         </div>
       </div>
+    );
+  }
+
+  // UPDATED INFO TYPE SLIDE
+  if (data.type === SlideType.INFO) {
+    const hasDeliverables = data.deliverables && data.deliverables.length > 0;
+    const hasImages = data.images && data.images.length > 0;
+    const isSplitLayout = hasDeliverables || hasImages;
+
+    return (
+        <div className="flex flex-col h-full px-8 md:px-16 pt-20 pb-12 max-w-[1400px] mx-auto justify-center w-full relative">
+            <Lightbox />
+            <ArchitectureModal />
+            
+            <div className="mb-10 border-l-4 border-purple-600 pl-8 flex justify-between items-end">
+                <div>
+                    <h2 className={`text-5xl md:text-6xl font-brand leading-none mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
+                        {data.title}
+                    </h2>
+                    {data.subtitle && (
+                        <p className={`text-2xl font-light tracking-wide ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {data.subtitle}
+                        </p>
+                    )}
+                </div>
+                
+                {/* Visual Architecture Button if Diagram exists */}
+                {data.mermaidDefinition && (
+                    <button 
+                        onClick={() => setShowArchModal(true)}
+                        className="hidden md:flex items-center gap-3 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-bold shadow-lg hover:shadow-purple-500/30 transition-all transform hover:-translate-y-1"
+                    >
+                        <Workflow size={20} />
+                        Previsualizar Arquitectura
+                    </button>
+                )}
+            </div>
+
+            <div className={`grid gap-12 ${isSplitLayout ? 'grid-cols-1 md:grid-cols-2 items-center' : 'grid-cols-1'}`}>
+                
+                {/* Left Column: Main Content */}
+                <div className="space-y-6">
+                    {data.content?.map((item, idx) => (
+                        <div key={idx} className="flex items-start gap-4">
+                            <div className={`mt-1.5 p-1 rounded-full flex-shrink-0 ${isDark ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-600'}`}>
+                                <CheckCircle size={20} />
+                            </div>
+                            <p className={`text-xl leading-relaxed ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
+                                {item}
+                            </p>
+                        </div>
+                    ))}
+                    
+                    {/* Mobile Button */}
+                    {data.mermaidDefinition && (
+                         <button 
+                            onClick={() => setShowArchModal(true)}
+                            className="md:hidden w-full flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-3 rounded-lg font-bold mt-4"
+                        >
+                            <Workflow size={20} />
+                            Ver Arquitectura
+                        </button>
+                    )}
+                </div>
+
+                {/* Right Column: Deliverables & Images */}
+                {isSplitLayout && (
+                    <div className="space-y-8 animate-in slide-in-from-right-8 duration-500 fade-in">
+                        
+                        {/* Deliverables Box */}
+                        {hasDeliverables && (
+                            <div className={`p-8 rounded-2xl border ${isDark ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-200 shadow-sm'}`}>
+                                <div className="flex items-center gap-2 mb-6 border-b pb-4 border-dashed border-gray-300">
+                                    <PackageCheck className="text-purple-600" />
+                                    <h3 className={`text-xl font-bold uppercase tracking-widest ${isDark ? 'text-white' : 'text-gray-800'}`}>
+                                        Entregables
+                                    </h3>
+                                </div>
+                                <ul className="space-y-3">
+                                    {data.deliverables?.map((del, idx) => (
+                                        <li key={idx} className={`flex items-center gap-3 font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                                            <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
+                                            {del}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        {/* Images Grid */}
+                        {hasImages && (
+                            <div>
+                                <h3 className={`flex items-center gap-2 text-sm font-bold uppercase tracking-widest mb-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    <ImageIcon size={16} /> Previsualización
+                                </h3>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {data.images?.map((img, idx) => (
+                                        <div 
+                                            key={idx}
+                                            className="relative aspect-video rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-purple-500 transition-all shadow-md group bg-gray-200"
+                                            onClick={() => setLightboxImg(img)}
+                                        >
+                                            <img src={img} alt={`Visual ${idx}`} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
+                                            <div className="absolute bottom-2 right-2 bg-black/70 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Maximize2 size={14} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
     );
   }
 
@@ -215,7 +420,7 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
                             
                             {/* Step Number */}
                             <span className="text-sm font-bold text-purple-600 mb-2 tracking-widest uppercase">
-                                Paso {step.step}
+                                {step.step}
                             </span>
 
                             {/* Title */}
@@ -256,7 +461,7 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {data.metrics?.map((metric, idx) => (
                 <div key={idx} className="bg-gray-50 p-8 rounded-xl border border-gray-200 hover:border-black transition-colors">
-                    <div className="text-6xl md:text-7xl font-brand text-transparent bg-clip-text bg-gradient-to-br from-purple-600 to-blue-600 mb-4">
+                    <div className="text-4xl md:text-5xl font-brand text-transparent bg-clip-text bg-gradient-to-br from-purple-600 to-blue-600 mb-4 break-words">
                         {metric.value}
                     </div>
                     <div className="text-lg font-bold uppercase tracking-wider mb-2 border-l-2 border-black pl-3">

@@ -6,7 +6,8 @@ export enum SlideType {
   SOLUTION = 'SOLUTION',
   METRICS = 'METRICS',
   CASES = 'CASES',
-  CONTACT = 'CONTACT'
+  CONTACT = 'CONTACT',
+  INFO = 'INFO'
 }
 
 export type SlideTheme = 'dark' | 'light';
@@ -45,7 +46,10 @@ export interface SlideData {
   title: string;
   subtitle?: string;
   content?: string[];
+  deliverables?: string[];
+  images?: string[];
   metrics?: MetricItem[];
   cases?: CaseStudy[];
   process?: ProcessStep[];
+  mermaidDefinition?: string;
 }
