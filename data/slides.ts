@@ -155,9 +155,7 @@ export const roadmapSlides: SlideData[] = [
     title: "Roadmap: SAAS",
     subtitle: "Centralización y Escalabilidad de Data Operativa",
     content: [
-      "Propuesta de valor y plan de ejecución",
-      "Para directores y gerentes de operación",
-      "Gestión de Capacitaciónes y reporteria"
+      "Plan de ejecución para directores, gerentes capacitadores y staff"
     ]
   },
   {
@@ -167,10 +165,10 @@ export const roadmapSlides: SlideData[] = [
     title: "Contexto del Problema",
     subtitle: "Estado Actual y Fricción",
     content: [
-      "Dependencia de data operativa sucia y dispersa.",
+      " Dependencia de data operativa sin tratamiento y dispersa.",
       "Consolidación manual propensa a errores.",
       "Identidad de usuario fragmentada (Zoom vs SAP).",
-      "Validación compleja: >80% tiempo en sesión."
+      "Cuello de botella  >80%  del tiempo del equipo en reportería."
     ]
   },
   {

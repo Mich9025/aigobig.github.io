@@ -164,14 +164,33 @@ const App: React.FC = () => {
              <div className="absolute top-[-20%] right-[-10%] w-[60vw] h-[60vw] bg-purple-900/30 rounded-full blur-[100px]"></div>
              <div className="absolute bottom-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-blue-900/20 rounded-full blur-[100px]"></div>
 
-             {/* Specific Hero Background Image - Blended ON TOP of the glows */}
+             {/* Specific Hero Background - Conditional based on Deck */}
              {currentSlide.type === SlideType.HERO && (
                 <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-                    <img 
-                        src={heroBgImage}
-                        alt="" 
-                        className="w-full h-full object-cover opacity-60 mix-blend-screen animate-ken-burns"
-                    />
+                    {activeDeck === 'main' ? (
+                        <img 
+                            src={heroBgImage}
+                            alt="" 
+                            className="w-full h-full object-cover opacity-60 mix-blend-screen animate-ken-burns"
+                        />
+                    ) : (
+                        // ERP / Tech Pattern for Roadmap
+                        <div className="absolute inset-0 opacity-20 pointer-events-none">
+                            {/* Technical Grid Pattern */}
+                            <div className="absolute inset-0" style={{ 
+                                backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), 
+                                                linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)`, 
+                                backgroundSize: '50px 50px' 
+                            }}></div>
+                            <div className="absolute inset-0" style={{ 
+                                backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), 
+                                                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)`, 
+                                backgroundSize: '10px 10px' 
+                            }}></div>
+                            {/* Top glow to emphasize title */}
+                            <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-purple-900/20 to-transparent"></div>
+                        </div>
+                    )}
                 </div>
              )}
          </div>
@@ -286,14 +305,29 @@ const App: React.FC = () => {
                         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-purple-900/30 rounded-full blur-[100px]"></div>
                         <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-900/20 rounded-full blur-[100px]"></div>
 
-                        {/* Show Image blended on top if Slide 1 */}
+                        {/* Show Image or Pattern blended on top if Slide 1 */}
                         {slide.type === SlideType.HERO && (
                              <div className="absolute inset-0 flex items-center justify-center">
-                                <img 
-                                    src={heroBgImage}
-                                    alt="" 
-                                    className="w-full h-full object-cover opacity-60 mix-blend-screen"
-                                />
+                                {activeDeck === 'main' ? (
+                                    <img 
+                                        src={heroBgImage}
+                                        alt="" 
+                                        className="w-full h-full object-cover opacity-60 mix-blend-screen"
+                                    />
+                                ) : (
+                                    <div className="absolute inset-0 opacity-20">
+                                        <div className="absolute inset-0" style={{ 
+                                            backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), 
+                                                            linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)`, 
+                                            backgroundSize: '50px 50px' 
+                                        }}></div>
+                                        <div className="absolute inset-0" style={{ 
+                                            backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), 
+                                                            linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)`, 
+                                            backgroundSize: '10px 10px' 
+                                        }}></div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
