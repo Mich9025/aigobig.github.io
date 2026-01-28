@@ -230,12 +230,12 @@ export const roadmapSlides: SlideData[] = [
       {
         step: "Fase 1",
         title: "MVP",
-        description: "6-8 semanas. Dashboard central y reportes core."
+        description: "4-6 semanas - Hombre. Dashboard central y reportes core."
       },
       {
         step: "Fase 2",
         title: "Full",
-        description: "11-16 semanas. Workflows avanzados."
+        description: "8-12 semanas - Hombre. Workflows avanzados."
       },
       {
         step: "Fase 3",
@@ -267,7 +267,7 @@ export const roadmapSlides: SlideData[] = [
     type: SlideType.INFO,
     theme: 'light',
     title: "Fase 1: MVP",
-    subtitle: "Duración: 10 a 16 Semanas",
+    subtitle: "Duración: 4-6 semanas - Hombre",
     content: [
       "Ingesta automática de logs de Zoom y Master de Tiendas.",
       "Dashboard interactivo para Directores y Gerentes.",
@@ -291,7 +291,7 @@ export const roadmapSlides: SlideData[] = [
     type: SlideType.INFO,
     theme: 'light',
     title: "Fase 2: Versión Completa",
-    subtitle: "Duración: 11 a 20 Semanas",
+    subtitle: "Duración: 4-8 semanas - Hombre",
     content: [
       "Ampliación a Workflows avanzados de aprobación.",
       "Gestión granular de excepciones y justificaciones.",
