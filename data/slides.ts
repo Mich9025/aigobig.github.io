@@ -280,8 +280,8 @@ export const roadmapSlides: SlideData[] = [
         "Ranking por Tienda y Distrito"
     ],
     images: [
-        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2670&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop"
+        "https://pub-428bba053a0f499782c7cbc7a5af5402.r2.dev/adidas/dash%20adidas.png",
+        "https://pub-428bba053a0f499782c7cbc7a5af5402.r2.dev/adidas/dash%20adidas%202.png"
     ]
   },
   {
@@ -325,7 +325,7 @@ export const roadmapSlides: SlideData[] = [
         "App web responsiva"
     ],
     images: [
-        "https://images.unsplash.com/photo-1535378437323-9555841f5d21?q=80&w=2548&auto=format&fit=crop",
+        "https://pub-428bba053a0f499782c7cbc7a5af5402.r2.dev/adidas/dash%20adidas%203.png",
         "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?q=80&w=2670&auto=format&fit=crop"
     ]
   },
@@ -338,8 +338,8 @@ export const roadmapSlides: SlideData[] = [
     content: [
       "Frontend: Next.js + React.js + TypeScript (Velocidad y Tipado).",
       "Backend: Node.js con arquitectura orientada a eventos.",
-      "Base de Datos: SQL Relacional (PostgreSQL) para integridad de datos.",
-      "Infraestructura: Despliegue en la nube con CI/CD automatizado."
+      "Infraestructura GCP: Compute Engine, Storage, AlloyDB y Logging.",
+      "Integraciones: Zoom y Google Meet para captura de datos."
     ],
     mermaidDefinition: `
     graph TD
@@ -347,7 +347,7 @@ export const roadmapSlides: SlideData[] = [
       Browser[Navegador Web]
     end
 
-    subgraph Cloud [Infraestructura Cloud]
+    subgraph Cloud [Google Cloud Platform]
       LB[Load Balancer]
       
       subgraph App [Aplicación]
@@ -356,22 +356,24 @@ export const roadmapSlides: SlideData[] = [
         Worker[Workers Asíncronos]
       end
       
-      subgraph Data [Datos]
-        DB[(PostgreSQL)]
-        Cache[(Redis Cache)]
+      subgraph Services [Servicios GCP]
+        DB[(AlloyDB PostgreSQL)]
+        Storage[(Cloud Storage)]
+        Logs[Cloud Logging]
       end
     end
 
     subgraph External [Fuentes Externas]
-      Zoom[Zoom API]
-      Master["Master Tiendas (Excel/CSV)"]
+      Zoom[Zoom / Google Meet]
+      Master["Master Tiendas"]
     end
 
     Browser -->|HTTPS| LB
     LB --> Next
     Next -->|SSR/API| API
     API -->|Query| DB
-    API -->|Cache| Cache
+    API -->|Files| Storage
+    API -->|Logs| Logs
     API -->|Job| Worker
     Worker -->|Process| Zoom
     Worker -->|Ingest| Master
@@ -379,11 +381,51 @@ export const roadmapSlides: SlideData[] = [
     
     style Client fill:#f9f,stroke:#333,stroke-width:2px
     style Cloud fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
-    style Data fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
+    style Services fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
     `
   },
   {
     id: 11,
+    type: SlideType.INFO,
+    theme: 'dark',
+    title: "El Costo de la Inacción",
+    subtitle: "¿Qué pasa si no evolucionamos hoy?",
+    content: [
+      "Desperdicio de Capital Humano: El equipo continuará dedicando >80% de su tiempo a 'limpiar datos' en lugar de analizar estrategias.",
+      "Ceguera Operativa: Sin centralización, no sabremos qué tiendas realmente consumen el contenido hasta fin de mes (demasiado tarde).",
+      "Fricción de Escala: Agregar más tiendas requerirá contratar más personal administrativo de forma lineal.",
+      "Datos Efímeros: La data valiosa de las interacciones en Zoom y Meet se seguirá perdiendo día tras día sin ser explotada."
+    ],
+    images: [
+        "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2670&auto=format&fit=crop"
+    ]
+  },
+  {
+    id: 12,
+    type: SlideType.METRICS,
+    theme: 'light',
+    title: "Propuesta de Inversión",
+    subtitle: "Estructura de Costos por Etapas",
+    metrics: [
+      {
+        value: "$6,500 USD",
+        label: "Fase 1: MVP",
+        subLabel: "Implementación Core (4-6 semanas)"
+      },
+      {
+        value: "$3,500 USD",
+        label: "Fase 2: Full Release",
+        subLabel: "Funcionalidades Avanzadas - max 200 usuarios"
+      },
+      {
+        value: "$5,000 USD*",
+        label: "Fase 3: Evolución",
+        subLabel: "*Opción SaaS: $15 USD/usuario"
+      }
+    ]
+  },
+  {
+    id: 13,
     type: SlideType.INFO,
     theme: 'light',
     title: "Riesgos y Mitigaciones",
@@ -396,7 +438,7 @@ export const roadmapSlides: SlideData[] = [
     ]
   },
   {
-    id: 12,
+    id: 14,
     type: SlideType.CONTACT,
     theme: 'dark',
     title: "Próximos Pasos.",

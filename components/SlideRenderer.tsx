@@ -449,6 +449,11 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
   }
 
   if (data.type === SlideType.METRICS) {
+    // Dynamic Grid logic: 3 items = 3 columns, 4 items = 4 columns (or 2x2)
+    const gridColsClass = data.metrics?.length === 3 
+        ? "grid-cols-1 md:grid-cols-3" 
+        : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4";
+
     return (
       <div className="flex flex-col h-full px-8 md:px-24 justify-center max-w-7xl mx-auto w-full">
          <div className="mb-12 border-b border-black pb-8">
@@ -458,7 +463,7 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
             <p className="text-xl text-gray-600">{data.subtitle}</p>
          </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className={`grid ${gridColsClass} gap-8`}>
             {data.metrics?.map((metric, idx) => (
                 <div key={idx} className="bg-gray-50 p-8 rounded-xl border border-gray-200 hover:border-black transition-colors">
                     <div className="text-4xl md:text-5xl font-brand text-transparent bg-clip-text bg-gradient-to-br from-purple-600 to-blue-600 mb-4 break-words">
