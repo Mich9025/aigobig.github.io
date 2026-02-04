@@ -286,6 +286,48 @@ export const roadmapSlides: SlideData[] = [
   },
   {
     id: 8,
+    type: SlideType.DIAGRAM,
+    theme: 'light',
+    title: "Flujo de Usuario",
+    subtitle: "Experiencia UX para Cada Rol",
+    mermaidDefinition: `
+    graph TD
+    Start((Inicio)) --> Login[Login de baja fricción - Autocompletado]
+    Login --> SelectRole{Acceso por Rol}
+    
+    SelectRole -->|Trainer / Team Leader| Create[Crear Entrenamiento]
+    SelectRole -->|Director / Gerente| ViewDash[Consultar Dashboard]
+
+    subgraph Gestion_Entrenamiento [Proceso de Registro]
+        Create --> Topic[Selección de Categoría / Topic]
+        Topic --> Subtopic[Selección de Subtopic - Sugerido por IA]
+        Subtopic --> Stores[Asignar Tiendas Involucradas]
+        Stores --> PartType{Método de Registro}
+        
+        PartType -->|QR Code| Scan[Staff escanea QR]
+        PartType -->|Manual| Manual[Carga de asistentes anónimos/lista]
+        
+        Scan --> Validate[Validación de Identidad SAP]
+        Manual --> Validate
+        
+        Validate --> Quiz[Aplicación de Quiz de Retención]
+        Quiz --> Save[Guardar y Sincronizar con DB]
+    end
+
+    Save --> Reporting[Generación de KPIs Automáticos]
+    ViewDash --> Reporting
+    
+    Reporting --> Export[Descarga de Reportes PDF/Excel]
+    Reporting --> IA_Insights[Consulta de Insights Predictivos]
+
+    %% Estilos de Usuario
+    style Gestion_Entrenamiento fill:#f0f4f8,stroke:#9fb3c8,stroke-width:1px
+    style Login fill:#e3f2fd,stroke:#2196f3
+    style IA_Insights fill:#f3e5f5,stroke:#9c27b0
+    `
+  },
+  {
+    id: 9,
     type: SlideType.INFO,
     theme: 'light',
     title: "Fase 2: Versión Completa",
@@ -308,7 +350,7 @@ export const roadmapSlides: SlideData[] = [
     ]
   },
   {
-    id: 9,
+    id: 10,
     type: SlideType.INFO,
     theme: 'light',
     title: "Fase 3: Evolución",
@@ -330,7 +372,7 @@ export const roadmapSlides: SlideData[] = [
     ]
   },
   {
-    id: 10,
+    id: 11,
     type: SlideType.INFO,
     theme: 'light',
     title: "Stack & Arquitectura",
@@ -385,7 +427,55 @@ export const roadmapSlides: SlideData[] = [
     `
   },
   {
-    id: 11,
+    id: 12,
+    type: SlideType.DIAGRAM,
+    theme: 'light',
+    title: "Flujo de Datos",
+    subtitle: "De Fuente Dispersa a Inteligencia Centralizada",
+    mermaidDefinition: `
+    graph TD
+    subgraph Fuentes_Externas [Fuentes de Datos Dispersas]
+        A[Sesiones Zoom / Meet] -->|Transcripciones y Logs| E
+        B[Excel de Producción] -->|Carga Masiva| E
+        C[Internal Training Tracker] -->|Ingesta de Datos| E
+        D[Maestro de Tiendas / SAP] -->|IDs y Roles| E
+    end
+
+    subgraph Nucleo_SaaS [Cerebro de la Plataforma - GCP]
+        E{Agente de Normalización}
+        E -- "Limpia errores (ej. 'Messi' -> 'Predator')" --> F[(Fuente de la Verdad DB)]
+        E -- "Estandariza IDs SAP y Tiendas" --> F
+        
+        F --> G[Motor de Cálculo de KPIs]
+        F --> H[Módulo de Quiz Nativo]
+        F --> I[Deck Room - Onboarding]
+        
+        subgraph IA_Evolucion [Fase 3: Inteligencia Artificial]
+            M[Agentes de IA] -->|Analiza| F
+            M -->|Genera| N[Modelos Predictivos]
+            M -->|Resumen| O[Transcripciones de Sesiones]
+        end
+    end
+
+    subgraph Visualizacion_Accion [Outputs y Beneficios]
+        G --> J[Dashboard Directores/Gerentes]
+        H -->|Tasa de Retención| J
+        I -->|Progreso Staff| J
+        J --> K[Reportes Automatizados PDF/Excel]
+        J --> L[Ranking por Tienda y Distrito]
+        N -->|Alertas| J
+        O -->|Insights| J
+    end
+
+    %% Estilos
+    style E fill:#f9f,stroke:#333,stroke-width:2px
+    style F fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style IA_Evolucion fill:#f3e5f5,stroke:#7b1fa2,stroke-dasharray: 5 5
+    style J fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
+    `
+  },
+  {
+    id: 13,
     type: SlideType.INFO,
     theme: 'dark',
     title: "El Costo de la Inacción",
@@ -395,13 +485,10 @@ export const roadmapSlides: SlideData[] = [
       "Ceguera Operativa: Sin centralización, no sabremos qué tiendas realmente consumen el contenido hasta fin de mes (demasiado tarde).",
       "Fricción de Escala: Agregar más tiendas requerirá contratar más personal administrativo de forma lineal.",
       "Datos Efímeros: La data valiosa de las interacciones en Zoom y Meet se seguirá perdiendo día tras día sin ser explotada."
-    ],
-    images: [
-        "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=2670&auto=format&fit=crop"
     ]
   },
   {
-    id: 12,
+    id: 14,
     type: SlideType.METRICS,
     theme: 'light',
     title: "Propuesta de Inversión",
@@ -410,22 +497,25 @@ export const roadmapSlides: SlideData[] = [
       {
         value: "$6,500 USD",
         label: "Fase 1: MVP",
-        subLabel: "Implementación Core (4-6 semanas)"
+        subLabel: "Implementación Core (4-6 semanas)",
+        description: "Dashboard central, Ingesta de datos Zoom/SAP, Quiz Nativo y Ranking automatizado."
       },
       {
         value: "$3,500 USD",
         label: "Fase 2: Full Release",
-        subLabel: "Funcionalidades Avanzadas - max 200 usuarios"
+        subLabel: "Funcionalidades Avanzadas - max 200 usuarios",
+        description: "Workflows de aprobación, Gestión granular de excepciones, Soporte Multi-canal y Auditoría."
       },
       {
         value: "$5,000 USD*",
         label: "Fase 3: Evolución",
-        subLabel: "*Opción SaaS: $15 USD/usuario"
+        subLabel: "*Opción SaaS: $15 USD/usuario",
+        description: "Modelos predictivos de desempeño, Correlación con ventas y Agentes de IA avanzada."
       }
     ]
   },
   {
-    id: 13,
+    id: 15,
     type: SlideType.INFO,
     theme: 'light',
     title: "Riesgos y Mitigaciones",
@@ -438,7 +528,7 @@ export const roadmapSlides: SlideData[] = [
     ]
   },
   {
-    id: 14,
+    id: 16,
     type: SlideType.CONTACT,
     theme: 'dark',
     title: "Próximos Pasos.",

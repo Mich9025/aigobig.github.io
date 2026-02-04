@@ -7,7 +7,8 @@ export enum SlideType {
   METRICS = 'METRICS',
   CASES = 'CASES',
   CONTACT = 'CONTACT',
-  INFO = 'INFO'
+  INFO = 'INFO',
+  DIAGRAM = 'DIAGRAM'
 }
 
 export type SlideTheme = 'dark' | 'light';
@@ -16,6 +17,7 @@ export interface MetricItem {
   value: string;
   label: string;
   subLabel: string;
+  description?: string;
 }
 
 export interface CaseImages {

@@ -26,7 +26,11 @@ import {
   ShieldAlert,
   PackageCheck,
   Image as ImageIcon,
-  Workflow
+  Workflow,
+  Plus,
+  Minus,
+  RefreshCw,
+  Info
 } from 'lucide-react';
 
 interface SlideRendererProps {
@@ -37,40 +41,84 @@ interface SlideRendererProps {
 const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
   const [showArchModal, setShowArchModal] = useState(false);
+  
+  // Diagram Zoom/Pan State (Must be at top level, not conditional)
+  const [zoomState, setZoomState] = useState({ scale: 1, x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+
   const mermaidRef = useRef<HTMLDivElement>(null);
+  const embeddedMermaidRef = useRef<HTMLDivElement>(null);
 
   // Initialize mermaid configuration
   useEffect(() => {
     mermaid.initialize({ 
         startOnLoad: false,
-        theme: 'neutral',
+        theme: 'base',
+        themeVariables: {
+            fontFamily: 'Inter, sans-serif',
+            primaryColor: '#e0e7ff',
+            primaryBorderColor: '#4338ca',
+            primaryTextColor: '#1e1b4b',
+            lineColor: '#6366f1',
+        },
         securityLevel: 'loose',
-        fontFamily: 'Inter, sans-serif'
     });
   }, []);
 
-  // Render mermaid diagram when modal opens
+  // Render mermaid diagram when modal opens (For fallback or explicit modal calls)
   useEffect(() => {
     if (showArchModal && data.mermaidDefinition && mermaidRef.current) {
-        // Clear previous content
-        mermaidRef.current.innerHTML = '';
-        
-        // Use a unique ID for the diagram
-        const id = `mermaid-${Date.now()}`;
-        
-        // Attempt to render
-        mermaid.render(id, data.mermaidDefinition).then(({ svg }) => {
-            if (mermaidRef.current) {
-                mermaidRef.current.innerHTML = svg;
-            }
-        }).catch(err => {
-            console.error("Mermaid rendering failed", err);
-            if (mermaidRef.current) {
-                mermaidRef.current.innerHTML = '<p class="text-red-500">Error rendering diagram</p>';
-            }
-        });
+        renderMermaid(data.mermaidDefinition, mermaidRef.current);
     }
   }, [showArchModal, data.mermaidDefinition]);
+
+  // Render mermaid diagram immediately for DIAGRAM slides OR INFO slides with embedded diagram
+  useEffect(() => {
+    const shouldRender = (data.type === SlideType.DIAGRAM || data.type === SlideType.INFO) && 
+                         data.mermaidDefinition && 
+                         embeddedMermaidRef.current && 
+                         isActive;
+
+    if (shouldRender) {
+        // Small timeout to ensure DOM is ready during transitions
+        const timer = setTimeout(() => {
+            renderMermaid(data.mermaidDefinition!, embeddedMermaidRef.current!);
+        }, 100);
+        return () => clearTimeout(timer);
+    }
+  }, [data.type, data.mermaidDefinition, isActive]);
+
+  // Reset zoom when slide changes or becomes inactive
+  useEffect(() => {
+      if (!isActive) {
+          setZoomState({ scale: 1, x: 0, y: 0 });
+      }
+  }, [isActive, data.id]);
+
+  const renderMermaid = (definition: string, container: HTMLElement) => {
+    container.innerHTML = '';
+    const id = `mermaid-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    
+    mermaid.render(id, definition).then(({ svg }) => {
+        if (container) {
+            container.innerHTML = svg;
+            // Add some inline styles to the SVG to make it responsive
+            const svgElement = container.querySelector('svg');
+            if (svgElement) {
+                svgElement.style.width = '100%';
+                svgElement.style.height = '100%';
+                svgElement.style.maxWidth = '100%';
+                svgElement.style.maxHeight = '100%';
+            }
+        }
+    }).catch(err => {
+        console.error("Mermaid rendering failed", err);
+        if (container) {
+            container.innerHTML = '<p class="text-red-500">Error rendering diagram</p>';
+        }
+    });
+  };
 
   // Close lightbox/modal on Escape key
   useEffect(() => {
@@ -83,6 +131,34 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
+
+  const handleZoomIn = () => {
+      setZoomState(prev => ({ ...prev, scale: Math.min(prev.scale + 0.2, 3) }));
+  };
+
+  const handleZoomOut = () => {
+      setZoomState(prev => ({ ...prev, scale: Math.max(prev.scale - 0.2, 0.5) }));
+  };
+
+  const handleReset = () => {
+      setZoomState({ scale: 1, x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+      setIsDragging(true);
+      dragStartRef.current = { x: e.clientX - zoomState.x, y: e.clientY - zoomState.y };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+      if (!isDragging) return;
+      const newX = e.clientX - dragStartRef.current.x;
+      const newY = e.clientY - dragStartRef.current.y;
+      setZoomState(prev => ({ ...prev, x: newX, y: newY }));
+  };
+
+  const handleMouseUp = () => {
+      setIsDragging(false);
+  };
 
   const isDark = data.theme === 'dark';
 
@@ -110,7 +186,7 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
       );
   };
 
-  // Architecture Modal Component
+  // Architecture Modal Component (Still kept if needed, but INFO now favors inline)
   const ArchitectureModal = () => {
       if (!showArchModal) return null;
       return (
@@ -139,7 +215,7 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
                  {/* Content */}
                  <div className="flex-1 overflow-auto p-8 flex items-center justify-center bg-white relative">
                      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none"></div>
-                     <div ref={mermaidRef} className="w-full flex justify-center mermaid-container">
+                     <div ref={mermaidRef} className="w-full h-full flex justify-center items-center mermaid-container">
                          {/* Mermaid SVG will be injected here */}
                          <div className="flex items-center gap-2 text-gray-400 animate-pulse">
                              <List size={20} /> Generando diagrama...
@@ -150,6 +226,53 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
           </div>
       );
   }
+
+  // Helper function to render the embedded diagram container with zoom controls
+  const renderDiagramContainer = (customHeightClass = "h-full") => (
+    <div className={`w-full ${customHeightClass} bg-white rounded-xl shadow-inner border border-gray-200 overflow-hidden relative group`}>
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 pointer-events-none z-0"></div>
+        
+        {/* Zoom Controls */}
+        <div className="absolute bottom-6 right-6 z-30 flex flex-col gap-2 bg-white rounded-lg shadow-lg border border-gray-200 p-1 opacity-60 group-hover:opacity-100 transition-opacity">
+            <button onClick={handleZoomIn} className="p-2 hover:bg-gray-100 rounded text-gray-700" title="Zoom In">
+                <Plus size={20} />
+            </button>
+            <button onClick={handleReset} className="p-2 hover:bg-gray-100 rounded text-gray-700" title="Reset">
+                <RefreshCw size={16} />
+            </button>
+            <button onClick={handleZoomOut} className="p-2 hover:bg-gray-100 rounded text-gray-700" title="Zoom Out">
+                <Minus size={20} />
+            </button>
+        </div>
+
+        {/* Draggable Area */}
+        <div 
+            className={`w-full h-full flex items-center justify-center p-4 md:p-8 cursor-move relative z-10 transition-transform duration-100 ease-out`}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            style={{
+                transform: `translate(${zoomState.x}px, ${zoomState.y}px) scale(${zoomState.scale})`,
+                transformOrigin: 'center center'
+            }}
+        >
+            <div 
+                ref={embeddedMermaidRef} 
+                className="w-full h-full flex items-center justify-center select-none"
+            >
+                <div className="flex items-center gap-2 text-gray-400 animate-pulse">
+                    <List size={20} /> Generando visualización...
+                </div>
+            </div>
+        </div>
+        
+        {/* Hint overlay initially */}
+        <div className="absolute top-4 right-4 bg-black/10 text-black/50 px-3 py-1 rounded text-xs pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-20">
+            Arrastra para mover
+        </div>
+    </div>
+  );
 
   if (data.type === SlideType.HERO) {
     // Check if title is long (e.g. for Roadmap) to adjust font size
@@ -182,6 +305,26 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
                 </p>
             ))}
          </div>
+      </div>
+    );
+  }
+
+  if (data.type === SlideType.DIAGRAM) {
+    return (
+      <div className="flex flex-col h-full w-full px-4 md:px-12 pt-24 pb-8 max-w-[1600px] mx-auto overflow-hidden">
+        <div className="flex-shrink-0 mb-4 text-center">
+            <h2 className={`text-4xl md:text-6xl font-brand mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
+                {data.title}
+            </h2>
+            <p className={`text-xl font-light ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                {data.subtitle}
+            </p>
+        </div>
+        
+        {/* IMPORTANT FIX: added min-h-0 so the diagram wrapper respects the parent flex container height */}
+        <div className="flex-1 w-full relative min-h-0">
+            {renderDiagramContainer("h-full")}
+        </div>
       </div>
     );
   }
@@ -277,7 +420,8 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
   if (data.type === SlideType.INFO) {
     const hasDeliverables = data.deliverables && data.deliverables.length > 0;
     const hasImages = data.images && data.images.length > 0;
-    const isSplitLayout = hasDeliverables || hasImages;
+    const hasDiagram = !!data.mermaidDefinition;
+    const isSplitLayout = hasDeliverables || hasImages || hasDiagram;
 
     return (
         <div className="flex flex-col h-full px-8 md:px-16 pt-20 pb-12 max-w-[1400px] mx-auto justify-center w-full relative">
@@ -295,17 +439,6 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
                         </p>
                     )}
                 </div>
-                
-                {/* Visual Architecture Button if Diagram exists */}
-                {data.mermaidDefinition && (
-                    <button 
-                        onClick={() => setShowArchModal(true)}
-                        className="hidden md:flex items-center gap-3 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-bold shadow-lg hover:shadow-purple-500/30 transition-all transform hover:-translate-y-1"
-                    >
-                        <Workflow size={20} />
-                        Previsualizar Arquitectura
-                    </button>
-                )}
             </div>
 
             <div className={`grid gap-12 ${isSplitLayout ? 'grid-cols-1 md:grid-cols-2 items-center' : 'grid-cols-1'}`}>
@@ -322,25 +455,21 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
                             </p>
                         </div>
                     ))}
-                    
-                    {/* Mobile Button */}
-                    {data.mermaidDefinition && (
-                         <button 
-                            onClick={() => setShowArchModal(true)}
-                            className="md:hidden w-full flex items-center justify-center gap-2 bg-purple-600 text-white px-4 py-3 rounded-lg font-bold mt-4"
-                        >
-                            <Workflow size={20} />
-                            Ver Arquitectura
-                        </button>
-                    )}
                 </div>
 
-                {/* Right Column: Deliverables & Images */}
+                {/* Right Column: Deliverables & Images OR Diagram */}
                 {isSplitLayout && (
-                    <div className="space-y-8 animate-in slide-in-from-right-8 duration-500 fade-in">
+                    <div className="space-y-8 animate-in slide-in-from-right-8 duration-500 fade-in w-full h-full flex flex-col justify-center">
                         
+                        {/* Embedded Diagram (High priority) */}
+                        {hasDiagram && (
+                            <div className="h-[400px] md:h-[500px] w-full">
+                                {renderDiagramContainer("h-full")}
+                            </div>
+                        )}
+
                         {/* Deliverables Box */}
-                        {hasDeliverables && (
+                        {!hasDiagram && hasDeliverables && (
                             <div className={`p-8 rounded-2xl border ${isDark ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-200 shadow-sm'}`}>
                                 <div className="flex items-center gap-2 mb-6 border-b pb-4 border-dashed border-gray-300">
                                     <PackageCheck className="text-purple-600" />
@@ -360,7 +489,7 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
                         )}
 
                         {/* Images Grid */}
-                        {hasImages && (
+                        {!hasDiagram && hasImages && (
                             <div>
                                 <h3 className={`flex items-center gap-2 text-sm font-bold uppercase tracking-widest mb-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                                     <ImageIcon size={16} /> Previsualización
@@ -465,16 +594,33 @@ const SlideRenderer: React.FC<SlideRendererProps> = ({ data, isActive }) => {
         
         <div className={`grid ${gridColsClass} gap-8`}>
             {data.metrics?.map((metric, idx) => (
-                <div key={idx} className="bg-gray-50 p-8 rounded-xl border border-gray-200 hover:border-black transition-colors">
+                <div key={idx} className="bg-gray-50 p-8 rounded-xl border border-gray-200 hover:border-black transition-all group relative overflow-hidden">
                     <div className="text-4xl md:text-5xl font-brand text-transparent bg-clip-text bg-gradient-to-br from-purple-600 to-blue-600 mb-4 break-words">
                         {metric.value}
                     </div>
                     <div className="text-lg font-bold uppercase tracking-wider mb-2 border-l-2 border-black pl-3">
                         {metric.label}
                     </div>
-                    <p className="text-sm text-gray-500 pl-3.5">
+                    <p className="text-sm text-gray-500 pl-3.5 mb-2">
                         {metric.subLabel}
                     </p>
+
+                    {/* Interaction Hint (Visible initially) */}
+                    {metric.description && (
+                         <div className="absolute top-4 right-4 text-purple-200 group-hover:text-purple-600 transition-colors">
+                             <Info size={20} />
+                         </div>
+                    )}
+
+                    {/* Hover Modal/Overlay */}
+                    {metric.description && (
+                        <div className="absolute inset-0 bg-gobig-accent/95 backdrop-blur-sm p-6 flex flex-col justify-center items-center text-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0 z-10">
+                            <Info size={32} className="text-white mb-3" />
+                            <p className="text-white font-medium text-lg leading-snug">
+                                {metric.description}
+                            </p>
+                        </div>
+                    )}
                 </div>
             ))}
         </div>
